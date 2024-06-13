@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Example</title>
+    <style>
+        body{
+            background-color: rgb(58, 160, 140);
+        }
+        form label{
+            font-size: 18px;
+            margin-right: 15px;
+            font-weight: 700;
+            min-width: 50px;
+        }
+        form input{
+            padding: 10px;
+            border-radius: 50px;
+            font-size: 18px;
+            margin-right: 10px;
+            margin-bottom: 20px;
+            border: 0;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, .2);
+        }
+        form div{
+            display: flex;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+        .container{
+            display: block;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #eaeaea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;    background-color: #efefef;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, .5);
+            padding: 20px;
+        }
+        table{
+            width: 100%;
+            margin-top: 50px;
+            border-radius: 10px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, .2);
+        }
+        tr th{
+            background-color: rgb(27, 27, 27);;
+            color: #fff;
+        }
+        tr td{
+            font-size: 18px;
+            text-align: center;
+            background-color: #fff;
+            /* display: flex;
+            flex-direction: column; */
+        }
+        textarea{
+            border-radius: 20px;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 0;
+            margin-bottom: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, .2);
+        }
+        button{
+            padding: 10px;
+            border: 0;
+            font-size: 18px;
+            margin: 0 20px;
+            min-width: 100px;
+            border-radius: 50px;
+            float: right;
+            margin-right: 0px;
+            cursor: pointer;
+
+            &.black{
+                background-color: rgb(27, 27, 27);
+                color: #fff;
+                margin-bottom: 30px;
+            }
+        }
+        tbody{
+            margin-top: 50px;
+        }
+        tbody td{
+            word-break: break-all;
+        }
+        tbody td:nth-child(3){
+            max-width: 500px;
+            min-width: 200px;
+            text-align: left;
+        }
+        tbody td:nth-child(4){
+            margin-right: 20px;
+        }
+        tbody td:nth-child(4) button{
+            margin: 0;
+        }
+        @media(max-width:992px){
+            tbody td:nth-child(4) button{
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>留言區</h1>
+        <form id="userForm">
+            <input type="hidden" id="userId" />
+            <div>
+                <label for="username">姓名:</label>
+                <input type="text" id="username" required />
+            </div>
+            <div>
+                <label for="email">信箱:</label>
+                <input type="email" id="email" required />
+            </div>
+            <div>
+                <label for="mytext">留言:</label>
+                <textarea name="mytext" id="mytext" rows="6" cols="40" required></textarea>
+            </div>
+            
+            <button class="black" type="submit">送出</button>
+        </form>
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>信箱</th>
+                    <th>留言</th>
+                    <th>更新時間</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const userForm = document.getElementById('userForm');
+    const userTable = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+    let users = [];
+
+    // Function render users 
+    function renderTable() {
+        userTable.innerHTML = '';
+        users.forEach((user, index) => {
+            const row = userTable.insertRow();
+            row.insertCell(0).textContent = user.username;
+            row.insertCell(1).textContent = user.email;
+            row.insertCell(2).textContent = user.mytext;
+            row.insertCell(3).textContent = user.updatedAt;
+            const actionsCell = row.insertCell(4);
+
+            const editButton = document.createElement('button');
+            editButton.textContent = '編輯';
+            editButton.addEventListener('click', () => editUser(index));
+            actionsCell.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '刪除';
+            deleteButton.addEventListener('click', () => deleteUser(index));
+            actionsCell.appendChild(deleteButton);
+        });
+    }
+
+    // Create or Update 
+    userForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const userId = document.getElementById('userId').value;
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const mytext = document.getElementById('mytext').value;
+        const updatedAt = new Date().toLocaleString();
+
+        if (userId) {
+            // Update existing
+            users[userId] = { username, email, mytext, updatedAt};
+        } else {
+            // Create new 
+            users.push({ username, email, mytext, updatedAt });
+        }
+
+        userForm.reset();
+        document.getElementById('userId').value = '';
+        renderTable();
+    });
+
+    // Edit user
+    function editUser(index) {
+        const user = users[index];
+        document.getElementById('userId').value = index;
+        document.getElementById('username').value = user.username;
+        document.getElementById('email').value = user.email;
+        document.getElementById('mytext').value = user.mytext;
+    }
+
+    // Delete user
+    function deleteUser(index) {
+        users.splice(index, 1);
+        renderTable();
+    }
+
+    // Initial render
+    renderTable();
+});
+
+</script>
+</html>
